@@ -121,26 +121,29 @@ Return the exponent of `G`, i.e. the smallest positive integer `e` such that `g`
 """
 Base.exponent(x::GAPGroup) = GAP.Globals.Exponent(x.X)
 
+function _gap_rand(f, G::GAPGroup)
+    s = f(G.X)
+    return group_element(G, s)
+end
+
 """
     rand(G::Group)
 
 Return a random element of the group `G`.
 """
-function Base.rand(x::GAPGroup)
-   s = GAP.Globals.Random(x.X)
-   return group_element(x, s)
+function Base.rand(rng::Random.AbstractRNG, rs::Random.SamplerTrivial{Gr}) where Gr<:Oscar.GAPGroup
+   G = rs[]
+   return _gap_rand(GAP.Globals.Random, G)
 end
 
 """
     rand_pseudo(G::Group)
 
-Return a random element of the group `G`. It works faster than `rand`, but the elements are not necessarily equally distributed.
-"""
-function rand_pseudo(G::GAPGroup)
-   s = GAP.Globals.PseudoRandom(G.X)
-   return group_element(G,s)
-end
+Return a random element of the group `G`.
 
+`rand_pseudo` usually is faster than `rand`, however there is no guaranee on uniform distribution of the returned element.
+"""
+rand_pseudo(G::GAPGroup) = _gap_rand(GAP.Globals.PseudoRandom. G)
 
 function _maxgroup(x::T, y::T) where T <: GAPGroup
    # A typical situation should be that the two groups are identical,
