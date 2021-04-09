@@ -121,19 +121,15 @@ Return the exponent of `G`, i.e. the smallest positive integer `e` such that `g`
 """
 Base.exponent(x::GAPGroup) = GAP.Globals.Exponent(x.X)
 
-function _gap_rand(f, G::GAPGroup)
-    s = f(G.X)
-    return group_element(G, s)
-end
-
 """
     rand(G::Group)
 
 Return a random element of the group `G`.
 """
-function Base.rand(rng::Random.AbstractRNG, rs::Random.SamplerTrivial{Gr}) where Gr<:Oscar.GAPGroup
-   G = rs[]
-   return _gap_rand(GAP.Globals.Random, G)
+function Base.rand(rng::Random.MersenneTwister, rs::Random.SamplerTrivial{Gr}) where Gr<:Oscar.GAPGroup
+   # TODO: use the provided rng
+   # this should be possible after https://github.com/JuliaLang/julia/pull/38043
+   return rand(GAP.default_rng(), rs[])
 end
 
 """
@@ -150,7 +146,7 @@ For finitely presented groups, it returns random words of bounded length.
 For finite permutation and matrix groups, it uses a variant of the product replacement algorithm.
 For most inputs, the resulting stream of elements relatively quickly converges to a uniform distribution.
 """
-rand_pseudo(G::GAPGroup) = _gap_rand(GAP.Globals.PseudoRandom. G)
+rand_pseudo(G::GAPGroup) = group_element(G, GAP.Globals.PseudoRandom(G.X))
 
 function _maxgroup(x::T, y::T) where T <: GAPGroup
    # A typical situation should be that the two groups are identical,
