@@ -139,9 +139,16 @@ end
 """
     rand_pseudo(G::Group)
 
-Return a random element of the group `G`.
+Return a pseudo random element of the group `G`.
 
-`rand_pseudo` usually is faster than `rand`, however there is no guaranee on uniform distribution of the returned element.
+It is sometimes necessary to work with finite groups that we cannot effectively enumerate, e.g. matrix groups over finite fields. We may not even know the size of these groups. Yet many algorithms need to sample elements from the group "as randomly as possible", whatever that means; but also they need this *fast*.
+
+The function `rand_pseudo` returns elements that are cheap to compute and somehow random, but makes no guarantees about their distribution.
+
+For finitely presented groups, it returns random words of bounded length.
+
+For finite permutation and matrix groups, it uses a variant of the product replacement algorithm.
+For most inputs, the resulting stream of elements relatively quickly converges to a uniform distribution.
 """
 rand_pseudo(G::GAPGroup) = _gap_rand(GAP.Globals.PseudoRandom. G)
 
